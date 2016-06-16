@@ -33,7 +33,7 @@ class Tree extends GitObject {
 
   static of (value) {
     var keys = Object.keys(value)
-    if (keys.length === 0) return new Tree(() => Promise.resolve(emptyTreeHash))
+    if (keys.length === 0) return Tree.empty
     return new Tree(
       (repo) => Promise.all(
         keys.map((name) => {
@@ -50,6 +50,7 @@ class Tree extends GitObject {
         })
       ).then((entries) => {
         var tree = entries.reduce(function (s, e) {
+          // if (e.hash === emptyTreeHash) return s
           s[e.name] = { mode: e.mode, hash: e.hash }
           return s
         }, {})
@@ -77,6 +78,7 @@ class Tree extends GitObject {
 //   })
 // }
 }
+Tree.empty = new Tree(() => Promise.resolve(emptyTreeHash))
 module.exports = Tree
 
 function decodeTree (body) {

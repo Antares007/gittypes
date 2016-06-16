@@ -2,7 +2,19 @@
 class Hashish {
   constructor (hashFn) {
     if (typeof hashFn !== 'function') throw new Error('argument error')
-    this.getHash = (repo) => hashFn(repo).then((hash) => (this.hash = hash, hash))
+    var self = this
+    this.getHash = function (repo) {
+      var map = repo._cache
+      if (map.has(self)) {
+        return map.get(self)
+      }
+      var rez = hashFn(repo).then(function (hash) {
+        self.hash = hash
+        return hash
+      })
+      map.set(self, rez)
+      return rez
+    }
   }
 
   bind (Type, fn) {
@@ -25,7 +37,9 @@ class Hashish {
   }
 
   castTo (Type) {
-    return new Type((repo) => this.getHash(repo))
+    var rez = new Type((repo) => this.getHash(repo))
+    if (this.hash) rez.hash = this.hash
+    return rez
   }
 
   static of (buffer) {
@@ -33,6 +47,7 @@ class Hashish {
   }
 
   static get (Type, api, hash) {
+    return new Type(() => Promise.resolve(hash))
     return new Type(function (api_) {
       if (api === api_) {
         return Promise.resolve(hash)
