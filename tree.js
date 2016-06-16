@@ -58,25 +58,6 @@ class Tree extends GitObject {
       })
     )
   }
-// get (path) {
-//   return this.bind(GitObject, function (t) {
-//     var pathsToGo = path.slice(1)
-//     var name = path[0].toLowerCase()
-//     var e
-//     for (var key in t) {
-//       if (key.toLowerCase() === name) {
-//         e = t[key]
-//         break
-//       }
-//     }
-//     if (!e) throw new Error('enoent')
-//     if (pathsToGo.length === 0) {
-//       return e
-//     }
-//     if (e instanceof Tree) return e.get(pathsToGo)
-//     throw new Error('enotdir')
-//   })
-// }
 }
 Tree.empty = new Tree(() => Promise.resolve(emptyTreeHash))
 module.exports = Tree
