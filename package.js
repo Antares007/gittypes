@@ -13,19 +13,16 @@ class Package extends Tree {
   }
 
   valueOf (api) {
-    return super.valueOf(api).then(function (tree) {
-      return tree['package.json'].castTo(Json).valueOf(api).then(function (pack) {
-        return (tree['dependencies'] || Tree.empty).valueOf(api).then(function (dependencies) {
-          return Object.assign({}, pack, {
-            src: tree['src'],
-            dependencies: Object.keys(dependencies).reduce(function (s, name) {
-              s[name] = dependencies[name].castTo(Package)
-              return s
-            }, {})
-          })
-        })
-      })
-    })
+    return super.valueOf(api)
+      .then((tree) => tree['package.json'].castTo(Json).valueOf(api)
+      .then((pack) => (tree['dependencies'] || Tree.empty).valueOf(api)
+      .then((dependencies) => Object.assign({}, pack, {
+        src: tree['src'],
+        dependencies: Object.keys(dependencies).reduce(function (s, name) {
+          s[name] = dependencies[name].castTo(Package)
+          return s
+        }, {})
+      }))))
   }
 
   static of (value) {

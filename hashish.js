@@ -1,25 +1,20 @@
 'use strict'
+const wrapHashFn = require('./gethashfn')
+
 class Hashish {
   constructor (hashFn) {
     if (typeof hashFn !== 'function') throw new Error('argument error')
-    var self = this
-    this.getHash = function (repo) {
-      var map = repo._cache
-      if (map.has(self)) {
-        return map.get(self)
-      }
-      var rez = hashFn(repo).then(function (hash) {
-        self.hash = hash
-        return hash
-      })
-      map.set(self, rez)
-      return rez
-    }
+    this.getHash = wrapHashFn(hashFn)
   }
 
   bind (Type, fn) {
-    return new Type((repo) => this.valueOf(repo).then(function (value) {
-      var rez = fn(value)
+    return Hashish.bindAll(Type, [this], function (values) { return fn.apply(this, values) })
+  }
+
+  static bindAll (Type, args, fn) {
+    return new Type((repo) => Promise.all(args.map((o) => o.valueOf(repo))).then(function (values) {
+      var rez = fn(values)
+      if (!rez) throw new Error('function not returns rez ' + fn.toString())
       if (rez instanceof Hashish) {
         if (rez instanceof Type) {
           return rez.getHash(repo)
@@ -47,22 +42,22 @@ class Hashish {
   }
 
   static get (Type, api, hash) {
-    return new Type(() => Promise.resolve(hash))
-    return new Type(function (api_) {
-      if (api === api_) {
-        return Promise.resolve(hash)
-      } else {
-        return api_.has(hash).then(function (hashHash) {
-          if (hashHash) {
-            return hash
-          } else {
-            return new Type(() => Promise.resolve(hash))
-              .valueOf(api)
-              .then((value) => Type.of(value).getHash(api_))
-          }
-        })
-      }
-    })
+    return new Type((api) => Promise.resolve(hash))
+    // return new Type(function (api_) {
+    //   if (api === api_) {
+    //     return Promise.resolve(hash)
+    //   } else {
+    //     return api_.has(hash).then(function (hashHash) {
+    //       if (hashHash) {
+    //         return hash
+    //       } else {
+    //         return new Type(() => Promise.resolve(hash))
+    //           .valueOf(api)
+    //           .then((value) => Type.of(value).getHash(api_))
+    //       }
+    //     })
+    //   }
+    // })
   }
 }
 module.exports = Hashish
