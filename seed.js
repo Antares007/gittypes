@@ -2,9 +2,9 @@ const Tree = require('./tree')
 const Package = require('./package')
 
 class Seed extends Tree {
-  call (Type) {
-    return new Type((api) => this.getHash(api).then((seedHash) => api.grow(seedHash)))
-  }
+  // call (Type) {
+  //   return new Type((api) => this.getHash(api).then((seedHash) => api.grow(seedHash)))
+  // }
 
   valueOf (api) {
     return super.valueOf(api).then(function (t) {

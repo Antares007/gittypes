@@ -2,16 +2,6 @@ const Tree = require('./tree')
 const Json = require('./json')
 
 class Package extends Tree {
-  call (Type, ...args) {
-    var Seed = require('./seed')
-    args = args.reduce(function (s, a, i) {
-      s[('000' + i.toString()).slice(-3)] = a
-      return s
-    }, {})
-    var argsTree = Tree.of(args)
-    return Seed.of({ args: argsTree, fn: this }).call(Type)
-  }
-
   valueOf (api) {
     return super.valueOf(api)
       .then((tree) => tree['package.json'].castTo(Json).valueOf(api)
